@@ -1,3 +1,18 @@
+## Table of Contents
+
+- [Overview](#overview)
+- [Objectives](#objectives)
+- [Tools Used](#tools-used)
+- [Data Preparation](#data-preparation)
+- [Techniques Used](#techniques-used)
+- [Key Analysis & Queries](#key-analysis--queries)
+- [Key Insights And Recommendation](#key-insights-&-recommendations)
+- [Overall Recommendation](#Overall-Recommendations)
+- [Author](#Author)
+    
+
+
+
 # EMPLOYEE-DEMOGRAPHICS-HR-ANALYTICS-WITH-SQL
 A SQL-based analysis of employee data to uncover insights on workforce diversity, employment status, and compensation trends.
 
@@ -28,7 +43,7 @@ All analysis was done using **pure SQL** in **PostgreSQL**, emphasizing backend-
 - **Excel** – for preprocessing and data cleaning  
 - **GitHub** – for documentation and version control
 
-## ✍️ Data Preparation
+##  Data Preparation
 - Standardized column names  
 - Resolved missing values  
 - Created calculated columns (e.g., `age`, `days_employed`)  
@@ -585,4 +600,9 @@ LIMIT 10;
 - Monitor and improve **pay equity** and performance review systems  
 - Invest in **diversity and inclusion** efforts at all levels  
 
+
+## Author
+
+**Amarachi**  
+_Data Analyst | SQL Enthusiast | Exploring HR and Business Insights through Data_
 
