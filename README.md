@@ -1,10 +1,16 @@
 # EMPLOYEE-DEMOGRAPHICS-HR-ANALYTICS-WITH-SQL
 A SQL-based analysis of employee data to uncover insights on workforce diversity, employment status, and compensation trends.
 
-## Overview  
-This project explores a company's employee dataset to uncover insights related to workforce diversity, employment status, compensation trends, and overall workforce composition. Using SQL, I performed detailed analysis on gender and racial distribution, department sizes, termination rates, and average pay by job roles.
+## Overview
+This project simulates a real-world HR analytics solution by examining employee data to:
 
-It simulates a real-world HR analytics dashboard, empowering stakeholders to better understand employee demographics, identify gaps, and make data-driven decisions.
+- Identify diversity patterns  
+- Analyze employment trends  
+- Investigate departmental dynamics  
+- Evaluate compensation distribution  
+- Assess performance & recruitment channels  
+
+All analysis was done using **pure SQL** in **PostgreSQL**, emphasizing backend-driven insight generation.
 
 ---
 
@@ -21,6 +27,12 @@ It simulates a real-world HR analytics dashboard, empowering stakeholders to bet
 - **PostgreSQL** – for querying and analysis  
 - **Excel** – for preprocessing and data cleaning  
 - **GitHub** – for documentation and version control
+
+## ✍️ Data Preparation
+- Standardized column names  
+- Resolved missing values  
+- Created calculated columns (e.g., `age`, `days_employed`)  
+- Split datasets into `EMPLOYEE`, `COMPENSATION`, and `PERFORMANCE` tables for clarity  
 
 
 ## Techniques Used
@@ -40,58 +52,66 @@ It simulates a real-world HR analytics dashboard, empowering stakeholders to bet
 - **Insights & Recommendations:**  
   Interpreted SQL query results to derive actionable HR insights and support data-driven decision making.
 
-## QUERIES
+## KEY ANALYSIS & QUERIES
 *Demographics & Diversity*
 
-**Gender Distribution**
-
+### 🎯 Gender Distribution
+```sql
 SELECT Sex AS Gender, Count(*) AS Number_Of_Employee,
 ROUND(Count(*)*100.0/(SELECT COUNT(*) FROM EMPLOYEE),2) || '%' AS Percentage
 FROM EMPLOYEE
 GROUP BY Gender;
+```
 
-**Data Output**
+**Data Output**  
 | Gender | Total Employees | Percentage |
 |--------|-----------------|------------|
 | Female | 177             | 57.10%     |
 | Male   | 133             | 42.90%     |
 
-**Race Distribution**
+---
 
+### 🌍 Race Distribution
+```sql
 SELECT race_desc AS Race, Count(*) AS Number_Of_Employee,
 ROUND(Count(*)*100.0/(SELECT COUNT(*) FROM EMPLOYEE),2) || '%' AS Percentage
 FROM EMPLOYEE
 GROUP BY Race
 ORDER BY Race DESC;
+```
 
-**Data Output**
-| Race                             | Total employees    | Percentage |
-|----------------------------------|--------------------|------------|
-| White                            | 193                | 62.26%     |
-| Black or African American        | 57                 | 18.39%     |
-| Asian                            | 34                 | 10.97%     |
-| Two or more races                | 18                 | 5.81%      |
-| American Indian or Alaska Native | 4                  | 1.29%      |
-| Hispanic                         | 4                  | 1.29%      |
+**Data Output**  
+| Race                             | Total employees | Percentage |
+|----------------------------------|-----------------|------------|
+| White                            | 193             | 62.26%     |
+| Black or African American        | 57              | 18.39%     |
+| Asian                            | 34              | 10.97%     |
+| Two or more races                | 18              | 5.81%      |
+| American Indian or Alaska Native | 4               | 1.29%      |
+| Hispanic                         | 4               | 1.29%      |
 
-**Citizenship*
+---
 
+### 🛂 Citizenship Distribution
+```sql
 SELECT Citizen_desc AS Citizenship, Count(*) AS Number_Of_Employee,
  ROUND(Count(*)*100.0/(SELECT COUNT(*) FROM EMPLOYEE),2) || '%' AS Percentage
  FROM EMPLOYEE
 GROUP BY Citizenship
 ORDER BY Number_Of_Employee DESC;
+```
 
-**Data Output**
+**Data Output**  
 | Citizenship         | Total Employees | Percentage |
 |---------------------|-----------------|------------|
 | US Citizen          | 294             | 94.84%     |
 | Eligible NonCitizen | 12              | 3.87%      |
 | Non-Citizen         | 4               | 1.29%      |
 
-**Average Age Of Employee In each department**
-*ADDING THE AGE COLUMN BECAUSE IT IS MISSING IN THE DATASET*
+---
 
+### 📊 Add and Calculate Employee Age
+```sql
 ALTER TABLE EMPLOYEE
 ADD COLUMN Age INTEGER;
 
@@ -102,7 +122,6 @@ UPDATE EMPLOYEE
 SET age = CASE
     WHEN employment_status = '%Terminated' THEN
         EXTRACT(YEAR FROM AGE(
-            -- Use actual termination year if available, else use 2016-06-16
             COALESCE(
                 TO_DATE(Date_of_termination::TEXT || '-01-01', 'YYYY-MM-DD'),
                 DATE '2016-06-16'
@@ -112,15 +131,19 @@ SET age = CASE
     ELSE
         EXTRACT(YEAR FROM AGE(CURRENT_DATE, DOB))
 END;
+```
 
-**Average Age Of Employees In Each Department**
+---
 
+### 📈 Average Age Of Employees In Each Department
+```sql
 SELECT Department, ROUND(AVG(Age),2) AS Age
 FROM EMPLOYEE
 GROUP BY Department
 ORDER BY Age DESC;
+```
 
-**Data Output**
+**Data Output**  
 | Department           | Average Age |
 |----------------------|-------------|
 | Executive Office     | 70.00       |
@@ -131,16 +154,15 @@ ORDER BY Age DESC;
 | Admin Offices        | 39.10       |
 
 
-*Recruitment And Hiring*
-
-**Identify top-performing managers in terms of recruitment volume**
-
-SELECT Manager_name, COUNT(*) employee_number
+### 👥 Identify Top-Performing Managers by Recruitment Volume
+```sql
+SELECT Manager_name, COUNT(*) AS employee_number
 FROM EMPLOYEE
 GROUP BY Manager_name
 ORDER BY employee_number DESC;
+```
 
-**Data Output**
+**Data Output**  
 | Manager/Recruiter  | Employee |
 |--------------------|----------|
 | Kelley Spirea      | 22       |
@@ -165,57 +187,68 @@ ORDER BY employee_number DESC;
 | Debra Houlihan     | 3        |
 | Board of Directors | 2        |
 
-**Average time(years) employee stay before termination**
+---
 
+### ⏳ Average Tenure Before Termination
+```sql
 SELECT ROUND (AVG(days_employed)/365 ,2) AS AVG_Years
 FROM COMPENSATION;
+```
 
-**Data Output**
-3.55Yrs Equivalent to 1,296.08Days
+**Data Output**  
+**3.55 Years** (equivalent to 1,296.08 Days)
 
-**Department by recruitment volume**
+---
 
-SELECT Department, count(*) employee_number
+### 🏢 Department by Recruitment Volume
+```sql
+SELECT Department, COUNT(*) AS employee_number
 FROM EMPLOYEE
 GROUP BY Department
-ORDER BY Employee_number DESC;
+ORDER BY employee_number DESC;
+```
 
-**Data Output**
-| Department           | Total Employee |
-|----------------------|----------------|
-| Production           | 208            |
-| IT/IS                | 50             |
-| Sales                | 31             |
-| Admin Offices        | 10             |
-| Software Engineering | 10             |
-| Executive Office     | 1              |
+**Data Output**  
+| Department           | Total Employees |
+|----------------------|-----------------|
+| Production           | 208             |
+| IT/IS                | 50              |
+| Sales                | 31              |
+| Admin Offices        | 10              |
+| Software Engineering | 10              |
+| Executive Office     | 1               |
 
-*Performance And Satisfaction*
 
-**Average Performance Score By Department**
-
-SELECT EMPLOYEE.Department, ROUND(AVG(PERFORMANCE.Perf_scoreid) ,2) AS Perf_num
+### ⭐ Average Performance Score by Department
+```sql
+SELECT EMPLOYEE.Department, ROUND(AVG(PERFORMANCE.Perf_scoreid), 2) AS Perf_num
 FROM EMPLOYEE
 LEFT JOIN PERFORMANCE ON EMPLOYEE.Employee_number = PERFORMANCE.Employee_number
 GROUP BY EMPLOYEE.Department
 ORDER BY Perf_num DESC;
+```
 
-**Data Output**
-| Department           | Perfomance Score |
-|----------------------|------------------|
-| Admin Offices        | 3.90             |
-| IT/IS                | 3.78             |
-| Production           | 3.49             |
-| Executive Office     | 3.00             |
-| Sales                | 2.87             |
-| Software Engineering | 2.60             |
+**Data Output**  
+| Department           | Performance Score |
+|----------------------|-------------------|
+| Admin Offices        | 3.90              |
+| IT/IS                | 3.78              |
+| Production           | 3.49              |
+| Executive Office     | 3.00              |
+| Sales                | 2.87              |
+| Software Engineering | 2.60              |
 
-**Relationship between performance score and employee source**
+---
 
-SELECT Employee_source, ROUND(AVG(perf_scoreid) ,0) AS Performance_Sco, Performance_Score
+### 🔄 Relationship Between Performance Score and Employee Source
+```sql
+SELECT Employee_source, 
+       ROUND(AVG(perf_scoreid), 0) AS Performance_Score, 
+       Performance_Score
 FROM PERFORMANCE
-GROUP BY Employee_source,Performance_Score
-ORDER BY Performance_Sco ASC;
+GROUP BY Employee_source, Performance_Score
+ORDER BY Performance_Score ASC;
+```
 
 **Data Output**
 | Employee Source                        | Performance Score | Performance              |
@@ -311,17 +344,16 @@ ORDER BY Performance_Sco ASC;
 | Vendor Referral                        | 9                 | N/A- too early to review |
 
 
-*Compensation And Engagement*
-
-**Average payrate by department**
-
-SELECT EMPLOYEE.Department, ROUND(AVG(COMPENSATION.Pay_rate) ,2) AS Payment 
+### 💰 Average Pay Rate by Department
+```sql
+SELECT EMPLOYEE.Department, ROUND(AVG(COMPENSATION.Pay_rate), 2) AS Payment 
 FROM EMPLOYEE
 LEFT JOIN COMPENSATION ON EMPLOYEE.employee_number = COMPENSATION.employee_number
-GROUP BY Employee.Department
+GROUP BY EMPLOYEE.Department
 ORDER BY Payment DESC;
+```
 
-**Data Output**
+**Data Output**  
 | Department           | Payment Rate |
 |----------------------|--------------|
 | Executive Office     | 80.00        |
@@ -331,8 +363,10 @@ ORDER BY Payment DESC;
 | Admin Offices        | 31.90        |
 | Production           | 23.09        |
 
-**Are employees with more Days Employed paid better?**
+---
 
+### 📈 Are Employees with More Days Employed Paid Better?
+```sql
 SELECT 
   CASE 
     WHEN days_employed <= 365 THEN '0-1 year'
@@ -346,8 +380,9 @@ SELECT
 FROM COMPENSATION
 GROUP BY experience_range
 ORDER BY avg_salary DESC;
+```
 
-**Data Output**
+**Data Output**  
 | Experience Range | Total Employees | Average Salary |
 |------------------|-----------------|----------------|
 | 10+ years        | 2               | 36.00          |
@@ -356,15 +391,19 @@ ORDER BY avg_salary DESC;
 | 0-1 year         | 38              | 29.61          |
 | 3-5 years        | 118             | 29.37          |
 
-**TOP 5 managers Who oversee the higest paid teams**
-SELECT EMPLOYEE.Positions, EMPLOYEE.Manager_name, ROUND(Avg(COMPENSATION.Pay_Rate),2) AS SALARY
+---
+
+### 🧑‍💼 Top 5 Managers Who Oversee the Highest Paid Teams
+```sql
+SELECT EMPLOYEE.Positions, EMPLOYEE.Manager_name, ROUND(AVG(COMPENSATION.Pay_Rate), 2) AS Salary
 FROM EMPLOYEE
 LEFT JOIN COMPENSATION ON COMPENSATION.Employee_number = EMPLOYEE.Employee_number
 GROUP BY EMPLOYEE.Positions, EMPLOYEE.Manager_name
-ORDER BY SALARY DESC
+ORDER BY Salary DESC
 LIMIT 5;
+```
 
-**Data Output**
+**Data Output**  
 | Positions/Teams      | Manager Name       | Pay Rate |
 |----------------------|--------------------|----------|
 | President & CEO      | Board of Directors | 80.00    |
@@ -373,9 +412,8 @@ LIMIT 5;
 | IT Manager - Support | Jennifer Zamora    | 64.00    |
 | BI Director          | Jennifer Zamora    | 63.50    |
 
-*Termination & Turnover*
-
-**Termination Rate By department**
+### ❌ Termination Rate by Department
+```sql
 SELECT 
   department,
   COUNT(*) AS total_employees,
@@ -387,96 +425,164 @@ SELECT
 FROM employee
 GROUP BY department
 ORDER BY termination_rate_percent DESC;
+```
 
-**Data Output*
-| Department           | Total Employees | Terminated Employees |Termination Rate% |
-|----------------------|-----------------|----------------------|------------------|
-| Production           | 208             | 83                   | 39.90            |
-| Software Engineering | 10              | 3                    | 30.00            |
-| Admin Offices        | 10              | 2                    | 20.00            |
-| IT/IS                | 50              | 10                   | 20.00            |
-| Sales                | 31              | 4                    | 12.90            |
-| Executive Office     | 1               | 0                    | 0.00             |
+**Data Output**  
+| Department           | Total Employees | Terminated Employees | Termination Rate (%) |
+|----------------------|-----------------|----------------------|----------------------|
+| Production           | 208             | 83                   | 39.90                |
+| Software Engineering | 10              | 3                    | 30.00                |
+| Admin Offices        | 10              | 2                    | 20.00                |
+| IT/IS                | 50              | 10                   | 20.00                |
+| Sales                | 31              | 4                    | 12.90                |
+| Executive Office     | 1               | 0                    | 0.00                 |
 
-**Recruitment source vs number of termination
+---
+
+### 🧭 Termination Rate by Recruitment Source
+```sql
 SELECT PERFORMANCE.Employee_source, 
- 	 COUNT(*) AS total_employees,
-  COUNT(CASE WHEN EMPLOYEE.employment_status ILIKE '%Terminated%' THEN 1 END) AS terminated_employees,
-  ROUND(
-    100.0 * COUNT(CASE WHEN EMPLOYEE.employment_status ILIKE '%Terminated%' THEN 1 END) / COUNT(*), 
-    2
-  ) AS termination_rate_percent
+       COUNT(*) AS total_employees,
+       COUNT(CASE WHEN EMPLOYEE.employment_status ILIKE '%Terminated%' THEN 1 END) AS terminated_employees,
+       ROUND(
+         100.0 * COUNT(CASE WHEN EMPLOYEE.employment_status ILIKE '%Terminated%' THEN 1 END) / COUNT(*), 
+         2
+       ) AS termination_rate_percent
 FROM employee
 LEFT JOIN PERFORMANCE ON PERFORMANCE.Employee_number = EMPLOYEE.Employee_number
 GROUP BY PERFORMANCE.Employee_source
 ORDER BY termination_rate_percent DESC;
+```
 
-**Data Output**
-| Employee Source                        | Total Employees | Terminated Employees |Termination Rate% |
-|----------------------------------------|-----------------|----------------------|------------------|
-| Pay Per Click                          | 1               | 1                    | 100.00           |
-| Company Intranet - Partner             | 1               | 1                    | 100.00           |
-| On-line Web application                | 1               | 1                    | 100.00           |
-| Social Networks - Facebook Twitter etc | 11              | 8                    | 72.73            |
-| Search Engine - Google Bing Yahoo      | 25              | 15                   | 60.00            |
-| Diversity Job Fair                     | 29              | 16                   | 55.17            |
-| Word of Mouth                          | 13              | 7                    | 53.85            |
-| Monster.com                            | 24              | 11                   | 45.83            |
-| Glassdoor                              | 14              | 6                    | 42.86            |
-| Other                                  | 9               | 3                    | 33.33            |
-| Internet Search                        | 6               | 2                    | 33.33            |
-| Billboard                              | 16              | 5                    | 31.25            |
-| Newspager/Magazine                     | 18              | 5                    | 27.78            |
-| Vendor Referral                        | 15              | 4                    | 26.67            |
-| Information Session                    | 4               | 1                    | 25.00            |
-| MBTA ads                               | 17              | 4                    | 23.53            |
-| Professional Society                   | 20              | 3                    | 15.00            |
-| Pay Per Click - Google                 | 21              | 3                    | 14.29            |
-| Employee Referral                      | 31              | 4                    | 12.90            |
-| On-campus Recruiting                   | 12              | 1                    | 8.33             |
-| Website Banner Ads                     | 13              | 1                    | 7.69             |
-| Careerbuilder                          | 1               | 0                    | 0.00             |
-| Indeed                                 | 8               | 0                    | 0.00             |
+**Data Output**  
+| Employee Source                        | Total Employees | Terminated Employees | Termination Rate (%) |
+|----------------------------------------|-----------------|----------------------|-----------------------|
+| Pay Per Click                          | 1               | 1                    | 100.00                |
+| Company Intranet - Partner             | 1               | 1                    | 100.00                |
+| On-line Web application                | 1               | 1                    | 100.00                |
+| Social Networks - Facebook Twitter etc | 11              | 8                    | 72.73                 |
+| Search Engine - Google Bing Yahoo      | 25              | 15                   | 60.00                 |
+| Diversity Job Fair                     | 29              | 16                   | 55.17                 |
+| Word of Mouth                          | 13              | 7                    | 53.85                 |
+| Monster.com                            | 24              | 11                   | 45.83                 |
+| Glassdoor                              | 14              | 6                    | 42.86                 |
+| Other                                  | 9               | 3                    | 33.33                 |
+| Internet Search                        | 6               | 2                    | 33.33                 |
+| Billboard                              | 16              | 5                    | 31.25                 |
+| Newspager/Magazine                     | 18              | 5                    | 27.78                 |
+| Vendor Referral                        | 15              | 4                    | 26.67                 |
+| Information Session                    | 4               | 1                    | 25.00                 |
+| MBTA ads                               | 17              | 4                    | 23.53                 |
+| Professional Society                   | 20              | 3                    | 15.00                 |
+| Pay Per Click - Google                 | 21              | 3                    | 14.29                 |
+| Employee Referral                      | 31              | 4                    | 12.90                 |
+| On-campus Recruiting                   | 12              | 1                    | 8.33                  |
+| Website Banner Ads                     | 13              | 1                    | 7.69                  |
+| Careerbuilder                          | 1               | 0                    | 0.00                  |
+| Indeed                                 | 8               | 0                    | 0.00                  |
 
-**termination rate in one year Of hire**
+---
 
-ROUND(
-    100.0 * COUNT(CASE 
-                   WHEN employment_status ILIKE '%terminated%' 
-                        AND Date_Of_Termination IS NOT NULL 
-                        AND Date_Of_Termination - Date_Of_hire <= 365 
-                   THEN 1 
-                 END) / COUNT(*), 
-    2
-  ) AS terminated_within_1_year_percent
+### 📅 Termination Within One Year of Hire
+```sql
+SELECT ROUND(
+  100.0 * COUNT(CASE 
+                 WHEN employment_status ILIKE '%terminated%' 
+                      AND Date_Of_Termination IS NOT NULL 
+                      AND Date_Of_Termination - Date_Of_hire <= 365 
+                 THEN 1 
+               END) / COUNT(*), 
+  2
+) AS terminated_within_1_year_percent
 FROM EMPLOYEE;
+```
 
-**Data Output**
-10%
+**Data Output**  
+**10%** of employees were terminated within 1 year of being hired.
 
-**Top Ten Managers by performance of their team**
+---
 
-SELECT Manager_name, Positions, ROUND(AVG(Perf_scoreid) ,2) AS SCORE
+### 🏆 Top 10 Managers by Team Performance
+```sql
+SELECT Manager_name, Positions, ROUND(AVG(Perf_scoreid), 2) AS Score
 FROM EMPLOYEE
 LEFT JOIN PERFORMANCE ON PERFORMANCE.Employee_number = EMPLOYEE.Employee_number
-WHERE Perf_scoreid <= '5'
-GROUP BY MANAGER_NAME, Positions
-ORDER BY SCORE DESC
+WHERE Perf_scoreid <= 5
+GROUP BY Manager_name, Positions
+ORDER BY Score DESC
 LIMIT 10;
+```
 
-**Data Output**
-| Managers' Name     | Positions/Team           | Performance Score |
-|--------------------|--------------------------|-------------------|
-| Janet King         | CIO                      | 5.00              |
-| Jennifer Zamora    | IT Director              | 5.00              |
-| Janet King         | Director of Operations   | 4.00              |
-| Jennifer Zamora    | IT Manager - Support     | 4.00              |
-| Ketsia Liebig      | Production Technician II | 3.40              |
-| Eric Dougall       | IT Support               | 3.25              |
-| Kelley Spirea      | Production Technician II | 3.14              |
-| Brannon Miller     | Production Technician I  | 3.07              |
-| Brandon R. LeBlanc | Accountant I             | 3.00              |
-| Janet King         | Shared Services Manager  | 3.00              |
+**Data Output**  
+| Manager Name        | Positions/Team           | Performance Score |
+|---------------------|--------------------------|-------------------|
+| Janet King          | CIO                      | 5.00              |
+| Jennifer Zamora     | IT Director              | 5.00              |
+| Janet King          | Director of Operations   | 4.00              |
+| Jennifer Zamora     | IT Manager - Support     | 4.00              |
+| Ketsia Liebig       | Production Technician II | 3.40              |
+| Eric Dougall        | IT Support               | 3.25              |
+| Kelley Spirea       | Production Technician II | 3.14              |
+| Brannon Miller      | Production Technician I  | 3.07              |
+| Brandon R. LeBlanc  | Accountant I             | 3.00              |
+| Janet King          | Shared Services Manager  | 3.00              |
 
 
-#INSIGHTS AND RECOMMENDATIONS#
+##  Key Insights & Recommendations
+
+###  Diversity & Representation
+- **Gender Balance:**  
+  Female employees make up **57.1%** of the workforce, indicating strong female representation across departments.
+
+- **Racial Composition:**  
+  While **White employees (62.3%)** form the majority, other races like **Black or African American (18.4%)** and **Asian (11%)** contribute significantly—showing moderate racial diversity.
+
+- **Citizenship Status:**  
+  A dominant **94.8%** of the workforce are U.S. citizens. There’s room to diversify talent sources and explore global hiring options.
+
+---
+
+###  Age & Department Trends
+- **Older Departments:**  
+  Teams such as **Executive Office** and **Production** have higher average ages, reflecting leadership tenure and experience.
+
+- **Younger Teams:**  
+  Departments like **Software Engineering** and **Admin Offices** show younger workforce trends—ideal for talent development programs.
+
+---
+
+###  Turnover & Retention
+- **High Turnover Areas:**  
+  **Production (39.9%)** and **Software Engineering (30%)** have the highest termination rates. These teams may benefit from deeper retention strategies, satisfaction surveys, and workflow reviews.
+
+- **Early Exits:**  
+  **10%** of employees leave within their **first year** of hire. A structured onboarding experience, early-stage mentorship, and continuous engagement could help reduce early turnover.
+
+---
+
+###  Performance & Recruitment
+- **Top Managers by Team Performance:**  
+  Managers like **Jennifer Zamora** and **Janet King** consistently lead high-performing teams—highlighting their impact in IT and leadership roles.
+
+- **Effective Hiring Sources:**  
+  Recruitment through **employee referrals**, **on-campus recruiting**, and **professional societies** yielded higher performance scores. These sources are recommended for future scaling.
+
+---
+
+### Compensation & Growth
+- **Tenure vs. Salary:**  
+  Employees with **longer tenure (5–10+ years)** generally earn more. This suggests internal pay progression but should still be evaluated for equity.
+
+- **Departmental Pay Disparity:**  
+  Pay rates vary significantly across departments—highlighting the need for regular **compensation audits** to ensure fairness and competitiveness.
+
+---
+
+### Overall Recommendations
+- Focus on **retention strategies** in high-turnover departments  
+- Enhance **onboarding and mentoring** for new hires  
+- Continue leveraging **referrals and university recruiting** for talent acquisition  
+- Monitor and improve **pay equity** and performance review systems  
+- Invest in **diversity and inclusion** efforts at all levels  
+
+
